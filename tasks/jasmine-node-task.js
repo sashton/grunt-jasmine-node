@@ -1,59 +1,41 @@
 module.exports = function (grunt) {
     'use strict';
 
-    grunt.registerTask("jasmine_node", "Runs jasmine-node.", function() {
+    grunt.registerMultiTask("jasmine_node", "Runs jasmine-node.", function() {
       var jasmine = require('jasmine-node');
-      var util;
-      // TODO: ditch this when grunt v0.4 is released
-      grunt.util = grunt.util || grunt.utils;
-      var Path = require('path');
-      var _ = grunt.util._;
 
-      try {
-          util = require('util');
-      } catch(e) {
-          util = require('sys');
-      }
-
-      var projectRoot     = grunt.config("jasmine_node.projectRoot") || ".";
-      var source          = grunt.config("jasmine_node.source") || "src";
-      var specNameMatcher = grunt.config("jasmine_node.specNameMatcher") || "spec";
-      var teamcity        = grunt.config("jasmine_node.teamcity") || false;
-      var useRequireJs    = grunt.config("jasmine_node.requirejs") || false;
-      var extensions      = grunt.config("jasmine_node.extensions") || "js";
-      var match           = grunt.config("jasmine_node.match") || ".";
-      var matchall        = grunt.config("jasmine_node.matchall") || false;
-      var autotest        = grunt.config("jasmine_node.autotest") || false;
-      var useHelpers      = grunt.config("jasmine_node.useHelpers") || false;
-      var forceExit       = grunt.config("jasmine_node.forceExit") || false;
-
-      var isVerbose       = grunt.config("jasmine_node.verbose");
-      var showColors      = grunt.config("jasmine_node.colors");
-
-      if (_.isUndefined(isVerbose)) {
-        isVerbose = true;
-      }
-
-      if (_.isUndefined(showColors)) {
-        showColors = true;
-      }
-
-      var junitreport = {
+      // Merge task-specific options with these defaults.
+      var options = this.options({
+        projectRoot: '.',
+        source: 'src',
+        specNameMatcher: 'spec',
+        teamcity: false,
+        useRequireJs: false,
+        extensions: 'js',
+        match: '.',
+        matchall: false,
+        autotest: false,
+        useHelpers: false,
+        forceExit: false,
+        isVerbose: true,
+        showColors: true,
+        jUnit: {
           report: false,
           savePath : "./reports/",
           useDotNotation: true,
           consolidate: true
-      };
-
-      var jUnit = grunt.config("jasmine_node.jUnit") || junitreport;
+        }
+      });
 
       // Tell grunt this task is asynchronous.
       var done = this.async();
 
-      var regExpSpec = new RegExp(match + (matchall ? "" : specNameMatcher + "\\.") + "(" + extensions + ")$", 'i');
+      grunt.verbose.writeln("Options: " + options.projectRoot);
+      var regExpSpec = new RegExp(options.match + (options.matchall ? "" : options.specNameMatcher + "\\.") + "(" + options.extensions + ")$", 'i');
+
       var onComplete = function(runner, log) {
         var exitCode;
-        util.print('\n');
+        grunt.log.error("\n");
         if (runner.results().failedCount === 0) {
           exitCode = 0;
         } else {
@@ -67,19 +49,19 @@ module.exports = function (grunt) {
         done();
       };
 
-      var options = {
-        specFolder:   projectRoot,
-        onComplete:   onComplete,
-        isVerbose:    isVerbose,
-        showColors:   showColors,
-        teamcity:     teamcity,
-        useRequireJs: useRequireJs,
-        regExpSpec:   regExpSpec,
-        junitreport:  jUnit
+      var options2 = {
+        specFolder:   options.projectRoot,
+        onComplete:   options.onComplete,
+        isVerbose:    options.isVerbose,
+        showColors:   options.showColors,
+        teamcity:     options.teamcity,
+        useRequireJs: options.useRequireJs,
+        regExpSpec:   options.regExpSpec,
+        junitreport:  options.jUnit
       };
 
       // order is preserved in node.js
-      var legacyArguments = Object.keys(options).map(function(key) {
+      var legacyArguments = Object.keys(options2).map(function(key) {
         return options[key];
       });
 
@@ -90,7 +72,7 @@ module.exports = function (grunt) {
       catch (e) {
         try {
           // since jasmine-node@1.0.28 an options object need to be passed
-          jasmine.executeSpecsInFolder(options);
+          jasmine.executeSpecsInFolder(options2);
         } catch (e) {
           console.log('Failed to execute "jasmine.executeSpecsInFolder": ' + e.stack);
         }
