@@ -41,7 +41,7 @@ module.exports = function (grunt) {
         } else {
           exitCode = 1;
 
-          if (forceExit) {
+          if (options.forceExit) {
             process.exit(exitCode);
           }
         }
@@ -51,12 +51,12 @@ module.exports = function (grunt) {
 
       var options2 = {
         specFolder:   options.projectRoot,
-        onComplete:   options.onComplete,
+        onComplete:   onComplete,
         isVerbose:    options.isVerbose,
         showColors:   options.showColors,
         teamcity:     options.teamcity,
         useRequireJs: options.useRequireJs,
-        regExpSpec:   options.regExpSpec,
+        regExpSpec:   regExpSpec,
         junitreport:  options.jUnit
       };
 
