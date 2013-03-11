@@ -46,6 +46,11 @@ module.exports = function (grunt) {
           }
         }
 
+        // This little hack forces jasmine to create a new environment
+        // for the next set of test suites. Otherwise, test suites and 
+        // results are kept across task executions (multiTasks), causing
+        // exceptions and incorrect result reporting.
+        jasmine.getGlobal().jasmine.currentEnv_ = undefined;
         done();
       };
 
